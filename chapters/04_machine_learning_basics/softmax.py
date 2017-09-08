@@ -4,6 +4,7 @@
 import tensorflow as tf
 import os
 
+#with tf.device('/cpu:0'):
 # this time weights form a matrix, not a column vector, one "weight vector" per class.
 W = tf.Variable(tf.zeros([4, 3]), name="weights")
 # so do the biases, one per class.
@@ -43,7 +44,7 @@ def read_csv(batch_size, file_name, record_defaults):
 def inputs():
 
     sepal_length, sepal_width, petal_length, petal_width, label =\
-        read_csv(100, "./iris.data", [[0.0], [0.0], [0.0], [0.0], [""]])
+        read_csv(50, "iris.data", [[0.0], [0.0], [0.0], [0.0], [""]])
 
     # convert class names to a 0 based class index.
     label_number = tf.to_int32(tf.argmax(tf.to_int32(tf.stack([
@@ -71,9 +72,11 @@ def evaluate(sess, X, Y):
     print(sess.run(tf.reduce_mean(tf.cast(tf.equal(predicted, Y), tf.float32))))
 
 
-# Launch the graph in a session, setup boilerplate
-with tf.Session() as sess:
+gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
 
+# Launch the graph in a session, setup boilerplate
+#with tf.Session(config=tf.ConfigProto(log_device_placement=True, gpu_options=gpu_options)) as sess:
+with tf.Session() as sess:
     tf.global_variables_initializer().run()
 
     X, Y = inputs()
@@ -93,6 +96,9 @@ with tf.Session() as sess:
             print("loss: ", sess.run([total_loss]))
 
     evaluate(sess, X, Y)
+
+    import time
+    time.sleep(5)
 
     coord.request_stop()
     coord.join(threads)
