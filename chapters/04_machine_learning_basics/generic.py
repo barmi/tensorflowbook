@@ -11,25 +11,30 @@ def inference(X):
 
 def loss(X, Y):
     # compute loss over training data X and expected values Y
-    return
+    loss_val = 0
+    return loss_val
 
 def inputs():
     # read/generate input training data X and expected outputs Y
-    return
+    x_data = [ 1, 2 ]
+    y_data = 5
+    return x_data, y_data
 
 def train(total_loss):
     # train / adjust model parameters according to computed total loss
-    return
+    trained_val = 0
+    return trained_val
 
 def evaluate(sess, X, Y):
     # evaluate the resulting trained model
-    return
+    evaluated_val = 0
+    return evaluated_val
 
 
 # Launch the graph in a session, setup boilerplate
 with tf.Session() as sess:
 
-    tf.initialize_all_variables().run()
+    tf.global_variables_initializer().run()
 
     X, Y = inputs()
 
@@ -45,7 +50,7 @@ with tf.Session() as sess:
         sess.run([train_op])
         # for debugging and learning purposes, see how the loss gets decremented thru training steps
         if step % 10 == 0:
-            print "loss: ", sess.run([total_loss])
+            print("loss: ", sess.run([total_loss]))
 
     evaluate(sess, X, Y)
 
