@@ -95,9 +95,11 @@ with tf.Session() as sess:
 
     evaluate(sess, X, Y)
 
+    '''
     import time
     time.sleep(5)
+    '''
 
     coord.request_stop()
     coord.join(threads)
-    sess.close()
+    #sess.close()
