@@ -6,7 +6,7 @@ import os
 from itertools import groupby
 from collections import defaultdict
 
-sess = tf.InteractiveSession()
+#sess = tf.InteractiveSession()
 
 image_filenames = glob.glob("."+os.sep+"imagenet-dogs/n02*/*.jpg")
 
@@ -36,6 +36,8 @@ for dog_breed, breed_images in groupby(image_filename_with_breed, lambda x: x[0]
 
 
 def write_records_file(dataset, record_location):
+    sess = tf.InteractiveSession()
+
     """
     Fill a TFRecords file with the images found in `dataset` and include their category.
 
@@ -202,6 +204,7 @@ def make_model_4():
 
     # The output of this are all the connections between the previous layers and the 120 different dog breeds
     # available to train on.
+    global final_fully_connected
     final_fully_connected = tf.contrib.layers.fully_connected(
         hidden_layer_three,
         120,  # Number of dog breeds in the ImageNet Dogs dataset
@@ -209,15 +212,51 @@ def make_model_4():
     )
 
 
+
+graph = tf.Graph()
+
+
+def train_model():
+    # Find every directory name in the imagenet-dogs directory (n02085620-Chihuahua, ...)
+    labels = list(map(lambda c: c.split(os.sep)[-1], glob.glob("./imagenet-dogs/*")))
+
+    # Match every label from label_batch and return the index where they exist in the list of classes
+    train_labels = tf.map_fn(lambda l: tf.where(tf.equal(labels, l))[0, 0:1][0], label_batch, dtype=tf.int64)
+
+    loss = tf.reduce_mean(
+        tf.nn.sparse_softmax_cross_entropy_with_logits(
+            final_fully_connected, train_labels))
+
+    batch = tf.Variable(0)
+    learning_rate = tf.train.exponential_decay(
+        0.01,
+        batch * 3,
+        120,
+        0.95,
+        staircase=True)
+
+    optimizer = tf.train.AdamOptimizer(
+        learning_rate, 0.9).minimize(
+        loss, global_step=batch)
+
+    train_prediction = tf.nn.softmax(final_fully_connected)
+
+    feed_dict = 
+    with tf.Session(graph=graph) as session:
+        session.run(tf.initialize_all_variables())
+        print("Initialized")
+
 def main():
     '''
     write_records_files()
     '''
     load_images()
-    make_model_1()
-    make_model_2()
-    make_model_3()
-    make_model_4()
+    with graph.as_default():
+        make_model_1()
+        make_model_2()
+        make_model_3()
+        make_model_4()
+        train_model()
 
 
 main()
